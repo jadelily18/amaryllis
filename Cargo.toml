@@ -2,6 +2,11 @@
 name = "amaryllis"
 version = "0.1.0"
 authors = ["Jade Nash <jade@lilydev.com>"]
+description = "A Rust library for generating fast, high-quality profile avatars."
+keywords = ["avatar", "profile-picture", "pfp", "image"]
+readme = "README.md"
+documentation = "https://docs.rs/amaryllis"
+repository = "https://github.com/jadelily18/amaryllis"
 license = "MIT"
 edition = "2021"
 
@@ -13,7 +18,6 @@ imageproc = "0.23.0"
 colorgrad = "0.6.2"
 noise = "0.8.2"
 rusttype = "0.9.3"
-
 rand = "0.8.5"
 
 [dev-dependencies]

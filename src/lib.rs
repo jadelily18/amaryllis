@@ -1,4 +1,42 @@
-use colorgrad::Gradient;
+//! A Rust library for generating fast, high-quality profile avatars.
+//! 
+//! 
+//! ## Example
+//! 
+//! ```
+//! use amaryllis::Avatar;
+//! 
+//! // Simple
+//! Avatar::new(200, 200, None, None).simple([255, 255, 255, 255])
+//!     .save("simple_avatar.webp").unwrap();
+//! 
+//! // Simple with text
+//! Avatar::new(
+//!     200, 200,
+//!     Option::Some("John Middlename Doe"),
+//!     Option::Some([0, 0, 0, 255])
+//! ).simple([255, 255, 255, 255]).save(
+//!     "simple_avatar_text.webp"
+//! ).unwrap();
+//! 
+//! // Gradient
+//! Avatar::new(200, 200, None, None).gradient(0.0025, colorgrad::reds())
+//!     .save("gradient_avatar.webp").unwrap();
+//!
+//! // Gradient with text
+//! Avatar::new(
+//!     200, 200,
+//!     Option::Some("John Middlename Doe"),
+//!     Option::Some([0, 0, 0, 255])
+//! ).gradient(
+//!     0.0025,
+//!     CustomGradient::new().html_colors(&["deeppink", "cyan"]).build().unwrap()
+//! )
+//! .save("gradient_avatar_text.webp").unwrap();
+//! ```
+
+
+pub use colorgrad;
 use image::{ImageBuffer, Rgba, RgbaImage};
 use imageproc::drawing::{draw_text_mut, text_size};
 use rusttype::{Font, Scale};
@@ -8,18 +46,29 @@ use crate::utils::remap;
 
 mod utils;
 
-
+/// Struct representing an avatar
 #[allow(dead_code)]
-struct Avatar {
-    width: i32,
-    height: i32,
-    initials: Option<String>,
-    text_color: Option<[u8; 4]>
+pub struct Avatar {
+    /// Image width
+    pub width: i32,
+    pub height: i32,
+    /// Initials for a name, if given
+    pub initials: Option<String>,
+    /// Array of four unsigned 8-bit integers, representing an RGBA value, if given
+    pub text_color: Option<[u8; 4]>
 }
 
 #[allow(dead_code)]
 impl Avatar {
-    fn new(width: i32, height: i32, name_string: Option<String>, text_rgba: Option<[u8; 4]>) -> Self {
+    /// Returns a new Avatar object with specificied parameters
+    /// 
+    /// # Arguments
+    /// 
+    /// * `width` - Image width as a 32-bit integer
+    /// * `height` - Image height as a 32-bit integer
+    /// * `name_string` - The optional name or username of the owner of the avatar. If `None`, it will be ignored
+    /// * `text_rgba` - An optional array of four unsigned 8-bit integers, representing an RGBA value. If `name_string` is `Some`, this must be `Some`
+    pub fn new(width: i32, height: i32, name_string: Option<&str>, text_rgba: Option<[u8; 4]>) -> Self {
         return match name_string {
             Some(name) =>  {
                 if text_rgba.is_none() {
@@ -60,8 +109,22 @@ impl Avatar {
         };
     }
 
+    /// Returns an RGBA Image (`RgbaImage`) of a solid color (and initials of the user, if given)
+    /// 
+    /// # Arguments
+    /// 
+    /// * `color_rgba` - An array of four unsigned 8-bit integers, representing an RGBA value.
+    /// 
+    /// # Example
+    /// ```
+    /// use amaryllis::Avatar;
+    /// 
+    /// let avatar = Avatar::new(200, 200, None, None).simple([255, 255, 255, 255]);
+    /// 
+    /// avatar.save("cool_avatar.png");
+    /// ```
     #[allow(dead_code)]
-    fn simple(&self, color_rgba: [u8; 4]) -> RgbaImage {
+    pub fn simple(&self, color_rgba: [u8; 4]) -> RgbaImage {
         let mut image_buf: RgbaImage = ImageBuffer::new(
             u32::try_from(self.width).unwrap(),
             u32::try_from(self.height).unwrap()
@@ -103,8 +166,33 @@ impl Avatar {
         image_buf
     }
 
+
+    /// Returns an RGBA Image (`RgbaImage`) of a noisy gradient (and initials of the user, if given)
+    /// 
+    /// # Arguments
+    /// 
+    /// * `noise_scale` - A 64-bit float value representing noise scale. Higher values are more noisy
+    /// * `gradient` - A `Gradient` value to use as a background
+    /// 
+    /// # Example
+    /// ```
+    /// use amaryllis::Avatar;
+    /// use colorgrad::CustomGradient;
+    /// 
+    /// let avatar = Avatar::new(
+    ///     200, 
+    ///     200, 
+    ///     Option::Some("John Middlename Doe"),
+    ///     Option::Some([0, 0, 0, 255])
+    /// ).gradient(
+    ///     0.0025,
+    ///     CustomGradient::new().html_colors(&["deeppink", "cyan"]).build().unwrap()
+    /// );
+    /// 
+    /// avatar.save("cool_avatar.png");
+    /// ```
     #[allow(dead_code)]
-    fn gradient(&self, noise_scale: f64, gradient: Gradient) -> RgbaImage {
+    pub fn gradient(&self, noise_scale: f64, gradient: colorgrad::Gradient) -> RgbaImage {
         let noise = noise::OpenSimplex::new(rand::thread_rng().gen_range(0..4294967295));
 
         let mut image_buf: RgbaImage = ImageBuffer::new(
@@ -156,7 +244,7 @@ impl Avatar {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Avatar};
+    use crate::Avatar;
 
     use std::fs;
     use chrono::{DateTime, Utc};
@@ -188,7 +276,7 @@ mod tests {
         Avatar::new(
             200,
             200,
-            Option::Some("John Middlename Doe".to_string()),
+            Option::Some("John Middlename Doe"),
             Option::Some([0, 0, 0, 255])
         ).simple(
             [255, 255, 255, 255],
@@ -212,7 +300,7 @@ mod tests {
         Avatar::new(
             200,
             200,
-            Option::Some("John Middlename Doe".to_string()),
+            Option::Some("John Middlename Doe"),
             Option::Some([0, 0, 0, 255])
         ).gradient(
             0.0025,
