@@ -1,0 +1,20 @@
+[package]
+name = "amaryllis"
+version = "0.1.0"
+authors = ["Jade Nash <jade@lilydev.com>"]
+license = "MIT"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+image = { version = "0.24.6", features = ["webp-encoder"]}
+imageproc = "0.23.0"
+colorgrad = "0.6.2"
+noise = "0.8.2"
+rusttype = "0.9.3"
+
+rand = "0.8.5"
+
+[dev-dependencies]
+chrono = "0.4.26"
